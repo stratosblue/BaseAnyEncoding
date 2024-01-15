@@ -24,7 +24,7 @@ public class Base62DecodeBenchmark : GenericBenchmarkBase
     [Benchmark]
     public void BaseAnyEncodingDecode()
     {
-        using var data = _encoder.DecodeFromString(EncodedValue);
+        using var data = _encoder.DecodeFromString(EncodedValue.AsSpan());
 #if NET6_0_OR_GREATER
         Encoding.UTF8.GetString(data.Span);
 #else

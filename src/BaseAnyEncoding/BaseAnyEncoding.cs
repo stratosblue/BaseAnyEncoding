@@ -38,6 +38,52 @@ public interface IBaseAnyEncoder<T> : IDisposable where T : notnull, IEquatable<
 }
 
 /// <summary>
+/// 池化的 <typeparamref name="T"/> 数据，需要 Dispose（建议立即 Dispose ，当心值类型传递导致的多次 Dispose）
+/// </summary>
+/// <typeparam name="T"></typeparam>
+public ref struct PooledData<T>
+{
+    #region Private 字段
+
+    private T[] _pooledValue;
+
+    #endregion Private 字段
+
+    #region Public 属性
+
+    /// <summary>
+    /// 有效数据
+    /// </summary>
+    public ReadOnlySpan<T> Span { get; }
+
+    #endregion Public 属性
+
+    #region Internal 构造函数
+
+    internal PooledData(T[] pooledValue, ReadOnlySpan<T> values)
+    {
+        _pooledValue = pooledValue;
+        Span = values;
+    }
+
+    #endregion Internal 构造函数
+
+    #region Public 方法
+
+    /// <inheritdoc cref="IDisposable.Dispose"/>
+    public void Dispose()
+    {
+        if (_pooledValue is { } pooledValue)
+        {
+            _pooledValue = null!;
+            ArrayPool<T>.Shared.Return(pooledValue);
+        }
+    }
+
+    #endregion Public 方法
+}
+
+/// <summary>
 /// 基于任意序列的编码器
 /// </summary>
 public static class BaseAnyEncoding
@@ -116,6 +162,60 @@ public static class BaseAnyEncoding
 
         return InternalGeneralBaseEncode(source, baseValues);
     }
+
+    #region string
+
+    /// <summary>
+    /// 使用 <paramref name="baseValues"/> 作为基础表解码 <paramref name="source"/> 到字符串
+    /// </summary>
+    /// <param name="source"></param>
+    /// <param name="baseValues"></param>
+    /// <param name="encoding">编码，默认为 <see cref="Encoding.UTF8"/></param>
+    /// <returns></returns>
+    public static string DecodeToString(ReadOnlySpan<char> source, ReadOnlySpan<char> baseValues, Encoding? encoding = null)
+    {
+        using var pooledData = Decode(source, baseValues);
+        return pooledData.ToDisplayString(encoding);
+    }
+
+    /// <summary>
+    /// 使用 <paramref name="baseValues"/> 作为基础表编码 <paramref name="source"/> 到字符串
+    /// </summary>
+    /// <param name="source"></param>
+    /// <param name="baseValues"></param>
+    /// <returns></returns>
+    public static string EncodeToString(ReadOnlySpan<byte> source, ReadOnlySpan<char> baseValues)
+    {
+        using var pooledData = Encode(source, baseValues);
+        return pooledData.ToDisplayString();
+    }
+
+    /// <summary>
+    /// 使用 <paramref name="baseValues"/> 作为基础表编码 <paramref name="source"/> 到字符串
+    /// </summary>
+    /// <param name="source"></param>
+    /// <param name="baseValues"></param>
+    /// <param name="encoding">编码，默认为 <see cref="Encoding.UTF8"/></param>
+    /// <returns></returns>
+    public static string EncodeToString(ReadOnlySpan<char> source, ReadOnlySpan<char> baseValues, Encoding? encoding = null)
+    {
+#if NETSTANDARD2_0
+
+        var sourceData = (encoding ?? Encoding.UTF8).GetBytes(source.ToArray());
+        using var pooledData = Encode(sourceData, baseValues);
+        return pooledData.ToDisplayString();
+
+#else
+        using var buffer = MemoryPool<byte>.Shared.Rent(Encoding.UTF8.GetByteCount(source));
+
+        var length = (encoding ?? Encoding.UTF8).GetBytes(source, buffer.Memory.Span);
+        using var pooledData = Encode(buffer.Memory.Span.Slice(0, length), baseValues);
+        return pooledData.ToDisplayString();
+
+#endif
+    }
+
+    #endregion string
 
     #endregion Public 方法
 
@@ -931,52 +1031,6 @@ public static class BaseAnyEncodingExtensions
         var sourceData = (encoding ?? Encoding.UTF8).GetBytes(source);
         using var pooledData = encoder.Encode(sourceData);
         return pooledData.ToDisplayString();
-    }
-
-    #endregion Public 方法
-}
-
-/// <summary>
-/// 池化的 <typeparamref name="T"/> 数据，需要 Dispose（建议立即 Dispose ，当心值类型传递导致的多次 Dispose）
-/// </summary>
-/// <typeparam name="T"></typeparam>
-public ref struct PooledData<T>
-{
-    #region Private 字段
-
-    private T[] _pooledValue;
-
-    #endregion Private 字段
-
-    #region Public 属性
-
-    /// <summary>
-    /// 有效数据
-    /// </summary>
-    public ReadOnlySpan<T> Span { get; }
-
-    #endregion Public 属性
-
-    #region Internal 构造函数
-
-    internal PooledData(T[] pooledValue, ReadOnlySpan<T> values)
-    {
-        _pooledValue = pooledValue;
-        Span = values;
-    }
-
-    #endregion Internal 构造函数
-
-    #region Public 方法
-
-    /// <inheritdoc cref="IDisposable.Dispose"/>
-    public void Dispose()
-    {
-        if (_pooledValue is { } pooledValue)
-        {
-            _pooledValue = null!;
-            ArrayPool<T>.Shared.Return(pooledValue);
-        }
     }
 
     #endregion Public 方法
