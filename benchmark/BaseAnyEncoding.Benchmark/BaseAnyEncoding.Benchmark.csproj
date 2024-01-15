@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFrameworks>net472;net6.0;net7.0;net8.0</TargetFrameworks>
+    <RootNamespace>BaseAnyEncodingBenchmark</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Base62-Net" Version="1.2.157201" />
+    <PackageReference Include="BenchmarkDotNet" Version="*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\BaseAnyEncoding\BaseAnyEncoding.csproj" />
+  </ItemGroup>
+</Project>

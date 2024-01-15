@@ -1,0 +1,12 @@
+﻿{
+    "profiles": {
+        "BaseAnyEncoding.Benchmark-Encode": {
+            "commandName": "Project",
+            "commandLineArgs": "encode"
+        },
+        "BaseAnyEncoding.Benchmark-Decode": {
+            "commandName": "Project",
+            "commandLineArgs": "decode"
+        }
+    }
+}
