@@ -27,7 +27,7 @@ Data encoding library, capable of character set encoding (base16 base32 base58 b
  - 使用任意大小字符集(*)作为编码基础
 
     ```C#
-    var charset = ""嗷呜！".AsSpan();
+    var charset = "嗷呜！".AsSpan();
     var source = Encoding.UTF8.GetBytes("hello world");
 
     using var encodedData = System.Buffers.BaseAnyEncoding.Encode(source, charset);

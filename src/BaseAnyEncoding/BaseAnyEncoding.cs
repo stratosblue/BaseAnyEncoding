@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Text;
 
 #if NET8_0_OR_GREATER
 
@@ -887,9 +888,22 @@ public static class BaseAnyEncodingExtensions
     /// <param name="encoder"></param>
     /// <param name="source"></param>
     /// <returns></returns>
-    public static PooledData<byte> DecodeFromString(this IBaseAnyEncoder<char> encoder, string source)
+    public static PooledData<byte> DecodeFromString(this IBaseAnyEncoder<char> encoder, ReadOnlySpan<char> source)
     {
-        return encoder.Decode(source.AsSpan());
+        return encoder.Decode(source);
+    }
+
+    /// <summary>
+    /// 从 <paramref name="source"/> 解码数据到字符串
+    /// </summary>
+    /// <param name="encoder"></param>
+    /// <param name="source"></param>
+    /// <param name="encoding">编码，默认为 <see cref="Encoding.UTF8"/></param>
+    /// <returns></returns>
+    public static string DecodeToString(this IBaseAnyEncoder<char> encoder, ReadOnlySpan<char> source, Encoding? encoding = null)
+    {
+        using var pooledData = encoder.Decode(source);
+        return pooledData.ToDisplayString(encoding);
     }
 
     /// <summary>
@@ -901,7 +915,22 @@ public static class BaseAnyEncodingExtensions
     public static string EncodeToString(this IBaseAnyEncoder<char> encoder, ReadOnlySpan<byte> source)
     {
         using var pooledData = encoder.Encode(source);
-        return pooledData.Span.ToString();
+        return pooledData.ToDisplayString();
+    }
+
+    /// <summary>
+    /// 编码字符串 <paramref name="source"/> 到字符串
+    /// </summary>
+    /// <param name="encoder"></param>
+    /// <param name="source"></param>
+    /// <param name="encoding">编码，默认为 <see cref="Encoding.UTF8"/></param>
+    /// <returns></returns>
+    public static string EncodeToString(this IBaseAnyEncoder<char> encoder, string source, Encoding? encoding = null)
+    {
+        //TODO ArrayPool
+        var sourceData = (encoding ?? Encoding.UTF8).GetBytes(source);
+        using var pooledData = encoder.Encode(sourceData);
+        return pooledData.ToDisplayString();
     }
 
     #endregion Public 方法
@@ -948,6 +977,99 @@ public ref struct PooledData<T>
             _pooledValue = null!;
             ArrayPool<T>.Shared.Return(pooledValue);
         }
+    }
+
+    #endregion Public 方法
+}
+
+/// <summary>
+/// <see cref="PooledData{T}"/> 拓展方法
+/// </summary>
+[EditorBrowsable(EditorBrowsableState.Never)]
+public static class PooledDataExtensions
+{
+    #region Public 方法
+
+    /// <summary>
+    /// 创建用于展示的字符串
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="pooledData"></param>
+    /// <param name="separator">分隔字符串，默认没有分隔</param>
+    /// <param name="itemConverter">元素转换器，默认为 <see cref="object.ToString()"/></param>
+    /// <param name="capacity">内部使用的 <see cref="StringBuilder"/> 的初始化容量</param>
+    /// <returns></returns>
+    public static string ToDisplayString<T>(this PooledData<T> pooledData, string? separator = null, Func<T, string>? itemConverter = null, int capacity = 128)
+    {
+        var span = pooledData.Span;
+
+        if (span.IsEmpty)
+        {
+            return string.Empty;
+        }
+
+        itemConverter ??= static value => value!.ToString()!;
+
+        var builder = new StringBuilder(capacity);
+
+        if (string.IsNullOrEmpty(separator))
+        {
+            foreach (var item in span)
+            {
+                builder.Append(itemConverter(item));
+            }
+        }
+        else
+        {
+            foreach (var item in span)
+            {
+                builder.Append(itemConverter(item));
+                builder.Append(separator);
+            }
+            builder.Remove(builder.Length - separator!.Length, separator.Length);
+        }
+
+        return builder.ToString();
+    }
+
+    /// <summary>
+    /// 使用指定编码 <paramref name="encoding"/> 创建用于展示的字符串
+    /// </summary>
+    /// <param name="pooledData"></param>
+    /// <param name="encoding">编码，默认为 <see cref="Encoding.UTF8"/></param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    [DebuggerStepThrough]
+    public static string ToDisplayString(this PooledData<byte> pooledData, Encoding? encoding = null)
+    {
+        var span = pooledData.Span;
+
+        if (span.IsEmpty)
+        {
+            return string.Empty;
+        }
+
+#if NETSTANDARD2_0
+
+        return (encoding ?? Encoding.UTF8).GetString(span.ToArray());
+
+#else
+
+        return (encoding ?? Encoding.UTF8).GetString(span);
+
+#endif
+    }
+
+    /// <summary>
+    /// 创建用于展示的字符串
+    /// </summary>
+    /// <param name="pooledData"></param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    [DebuggerStepThrough]
+    public static string ToDisplayString(this PooledData<char> pooledData)
+    {
+        return pooledData.Span.ToString();
     }
 
     #endregion Public 方法
