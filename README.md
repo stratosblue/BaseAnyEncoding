@@ -16,7 +16,7 @@ Data encoding library, capable of character set encoding (base16 base32 base58 b
 ### 引用包
 ```xml
 <ItemGroup>
-  <PackageReference Include="BaseAnyEncoding" Version="1.0.0" />
+  <PackageReference Include="BaseAnyEncoding" Version="1.0.2" />
 </ItemGroup>
 ```
 

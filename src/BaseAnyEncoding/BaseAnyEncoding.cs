@@ -1,4 +1,6 @@
-﻿using System.Buffers.Binary;
+﻿#pragma warning disable IDE0130
+
+using System.Buffers.Binary;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;

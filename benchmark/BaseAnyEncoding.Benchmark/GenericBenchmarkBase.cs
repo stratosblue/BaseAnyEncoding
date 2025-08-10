@@ -5,7 +5,6 @@ using BenchmarkDotNet.Jobs;
 namespace BaseAnyEncodingBenchmark;
 
 [SimpleJob(RuntimeMoniker.Net472)]
-[SimpleJob(RuntimeMoniker.Net60)]
 [SimpleJob(RuntimeMoniker.Net80)]
 [MemoryDiagnoser]
 public abstract class GenericBenchmarkBase

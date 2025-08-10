@@ -1,0 +1,19 @@
+<Solution>
+  <Folder Name="/benchmark/">
+    <Project Path="benchmark/BaseAnyEncoding.Benchmark/BaseAnyEncoding.Benchmark.csproj" />
+  </Folder>
+  <Folder Name="/solution items/">
+    <File Path=".editorconfig" />
+    <File Path="CodeMaid.config" />
+    <File Path="Directory.Build.props" />
+    <File Path="global.json" />
+    <File Path="LICENSE.txt" />
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/BaseAnyEncoding/BaseAnyEncoding.csproj" />
+  </Folder>
+  <Folder Name="/test/">
+    <Project Path="test/BaseAnyEncoding.Test/BaseAnyEncoding.Test.csproj" />
+  </Folder>
+</Solution>

@@ -11,22 +11,18 @@ public class BaseCustomTests : FrequentlyUsedCharBaseTestBase
 
     #region Public 方法
 
-    [Ignore]
     public override void ShouldCodecEqualsStandard(string source)
     {
     }
 
-    [Ignore]
     public override void ShouldCodecEqualsStandardStatic(string source)
     {
     }
 
-    [Ignore]
     public override void ShouldEqualsStandardWithRandomValue(string source)
     {
     }
 
-    [Ignore]
     public override void ShouldEqualsStandardWithRandomValueStatic(string source)
     {
     }

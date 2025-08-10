@@ -122,7 +122,6 @@ public abstract class FrequentlyUsedCharBaseTestBase
     [DataRow(1 << 8)]
     [DataRow(1 << 9)]
     [DataRow(byte.MaxValue)]
-    [DataRow(sizeof(ulong))]
     public virtual void ShouldSuccessWithBoundaryValues(int length)
     {
         var random = new Random();

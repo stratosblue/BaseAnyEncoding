@@ -1,6 +1,7 @@
 ﻿using System.Buffers;
 using System.Text;
 
+[assembly: Parallelize(Scope = ExecutionScope.MethodLevel)]
 namespace BaseAnyEncodingTest;
 
 [TestClass]
@@ -72,15 +73,15 @@ public class GenericTest
         var data = Array.Empty<byte>();
         var data1 = Array.Empty<char>();
 
-        Assert.ThrowsException<ArgumentOutOfRangeException>(() => BaseAnyEncoding.Encode(data, "".AsSpan()));
-        Assert.ThrowsException<ArgumentOutOfRangeException>(() => BaseAnyEncoding.Encode(data, "1".AsSpan()));
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => BaseAnyEncoding.Encode(data, "".AsSpan()));
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => BaseAnyEncoding.Encode(data, "1".AsSpan()));
 
-        Assert.ThrowsException<ArgumentOutOfRangeException>(() => BaseAnyEncoding.Decode(data1, "".AsSpan()));
-        Assert.ThrowsException<ArgumentOutOfRangeException>(() => BaseAnyEncoding.Decode(data1, "1".AsSpan()));
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => BaseAnyEncoding.Decode(data1, "".AsSpan()));
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => BaseAnyEncoding.Decode(data1, "1".AsSpan()));
 
-        Assert.ThrowsException<ArgumentOutOfRangeException>(() => BaseAnyEncoding.CreateEncoder(" ".AsSpan()));
-        Assert.ThrowsException<ArgumentOutOfRangeException>(() => BaseAnyEncoding.CreateEncoder("1".AsSpan()));
-        Assert.ThrowsException<ArgumentOutOfRangeException>(() => BaseAnyEncoding.CreateEncoder('1'));
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => BaseAnyEncoding.CreateEncoder(" ".AsSpan()));
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => BaseAnyEncoding.CreateEncoder("1".AsSpan()));
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => BaseAnyEncoding.CreateEncoder('1'));
     }
 
     #endregion Public 方法
