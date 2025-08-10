@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <Version>1.0.2</Version>
+    <Version>1.0.3</Version>
 
     <Description>Data encoding library, capable of character set encoding (base16 base32 base58 base62, etc.), or any type of custom encoding. 数据编码库，可进行字符集编码（base16 base32 base58 base62等），或任意类型的自定义编码。</Description>
 
